@@ -11,31 +11,36 @@
 	<body>
 		<script src="js/three.js"></script>
 		<script>
-          var scene = new THREE.Scene();
-          var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+         var mouse, scene, camera, renderer;
 
-          var renderer = new THREE.WebGLRenderer();
-          renderer.setSize( window.innerWidth, window.innerHeight);
-          document.body.appendChild( renderer.domElement );
-          var mouse = new THREE.Vector2();
-          var geometry = new THREE.PlaneGeometry(4, 4);
-          var material = new THREE.MeshBasicMaterial( { color: 0xffeeff } );
-          var material2 = new THREE.MeshBasicMaterial( { color: 0x5555ff } );
-          var w_plane = new THREE.Mesh( geometry, material );
-          var xy_plane = new THREE.Mesh( geometry, material2 );
-          w_plane.position.x -= 2.5;
-          xy_plane.position.x += 2.5;
-          scene.add(w_plane);
-          scene.add(xy_plane);
-          
-          camera.position.z = 5;
+         function init(){
+             mouse = new THREE.Vector2();
+             scene = new THREE.Scene();
+             camera = new 
+             THREE.PerspectiveCamera(75, window.innerWidth 
+                 / window.innerHeight, 0.1, 1000 );
+             renderer = new THREE.WebGLRenderer();
+             renderer.setSize( window.innerWidth, window.innerHeight);
+             document.body.appendChild( renderer.domElement );
+             var geometry = new THREE.PlaneGeometry(4, 4);
+             var material = new THREE.MeshBasicMaterial( { color: 0xffeeff } );
+             var material2 = new THREE.MeshBasicMaterial( { color: 0x5555ff } );
+             var w_plane = new THREE.Mesh( geometry, material );
+             var xy_plane = new THREE.Mesh( geometry, material2 );
+             w_plane.position.x -= 2.5;
+             xy_plane.position.x += 2.5;
+             scene.add(w_plane);
+             scene.add(xy_plane);
+             camera.position.z = 5;
+         }
 
-          function animate() {
-	          requestAnimationFrame( animate );
-	          renderer.render( scene, camera );
-              /* cube.rotation.x += 0.01;
-               * cube.rotation.y += 0.01;*/
-          }
+         function animate() {
+	         requestAnimationFrame(animate);
+	         renderer.render( scene, camera );
+             /* cube.rotation.x += 0.01;
+              * cube.rotation.y += 0.01;*/
+         }
+         init();
          animate();
 		</script>
 	</body>
