@@ -11,7 +11,7 @@
 	<body>
 		<script src="js/three.js"></script>
 		<script>
-         var mouse, scene, camera, renderer;
+         var mouse, scene, camera, renderer, raycaster;
 
          function init(){
              mouse = new THREE.Vector2();
@@ -19,24 +19,52 @@
              camera = new 
              THREE.PerspectiveCamera(75, window.innerWidth 
                  / window.innerHeight, 0.1, 1000 );
+             raycaster = new THREE.Raycaster();
              renderer = new THREE.WebGLRenderer();
              renderer.setSize( window.innerWidth, window.innerHeight);
+             document.addEventListener('mousemove', 
+                                       onDocumentMouseMove, false);
              document.body.appendChild( renderer.domElement );
              var geometry = new THREE.PlaneGeometry(4, 4);
-             var material = new THREE.MeshBasicMaterial( { color: 0xffeeff } );
-             var material2 = new THREE.MeshBasicMaterial( { color: 0x5555ff } );
-             var w_plane = new THREE.Mesh( geometry, material );
-             var xy_plane = new THREE.Mesh( geometry, material2 );
+             var circle_geom = new THREE.CircleGeometry(0.1, 16);
+             var material = new THREE.MeshBasicMaterial({color: 0xffeeff});
+             var material2 = new THREE.MeshBasicMaterial({color: 0xBBBBff});
+             var mat_black = new THREE.MeshBasicMaterial({color: 0x000000});
+             var w_plane = new THREE.Mesh(geometry, material);
+             var xy_plane = new THREE.Mesh(geometry, material2);
+             var point = new THREE.Mesh(circle_geom, mat_black);
              w_plane.position.x -= 2.5;
              xy_plane.position.x += 2.5;
+             point.position.x -= 2.5;
              scene.add(w_plane);
              scene.add(xy_plane);
+             scene.add(point);
              camera.position.z = 5;
          }
+         
+         function onDocumentMouseMove(event){
+			 /* event.preventDefault();*/
+             /* convert to cartesian coordinate */
+             /* center = (0, 0), positive dir = up, right */
+			 mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+             /* -1.0 <= mouse.x < 1.0 */
+			 mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+             /* -1.0 <= mouse.y < 1.0 */
+             point.position.set(event.clientX, event.clientY, 0);
+		 }
+         
+         function render(){
+	         renderer.render(scene, camera);
+         }
 
-         function animate() {
+         function update(){
+             
+         }
+
+         function animate(){
 	         requestAnimationFrame(animate);
-	         renderer.render( scene, camera );
+             render();
+             update();
              /* cube.rotation.x += 0.01;
               * cube.rotation.y += 0.01;*/
          }
