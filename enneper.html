@@ -9,14 +9,14 @@
 		</style>
 	</head>
 	<body>
-        <p id="info">window_size (x, y), point position (x, y), mouse position (x, y)</p>
+        <!-- <p id="info">window_size (x, y), point position (x, y), mouse position (x, y)</p> -->
 		<script src="js/three.js"></script>
 		<script>
          var container, mouse, scene, camera, renderer;
          var point;
          var width = window.innerWidth;
          var height = window.innerHeight;
-         var r = 4.0;
+         var r = 5.0;
 
          init();
          animate();
@@ -26,19 +26,16 @@
              scene = new THREE.Scene();
              var aspect = width/height;
              camera = new 
-             /* THREE.PerspectiveCamera(75, window.innerWidth 
-              *     / window.innerHeight, 0.1, 1000 );*/
-             THREE.OrthographicCamera(-r*aspect, r*aspect, r, -r, 1, 1000);
+             THREE.OrthographicCamera(-r, r, r/aspect, -r/aspect, 1, 1000);
              raycaster = new THREE.Raycaster();
              renderer = new THREE.WebGLRenderer();
              renderer.setSize(width, height);
-             /* projector = new THREE.Projector();*/
              container = document.getElementById('ThreeJS');
              document.addEventListener('mousemove', 
                                        onDocumentMouseMove, false);
              document.body.appendChild( renderer.domElement );
              var geometry = new THREE.PlaneGeometry(4, 4);
-             var circle_geom = new THREE.CircleGeometry(0.1, 16);
+             var circle_geom = new THREE.CircleGeometry(0.05, 16);
              var material = new THREE.MeshBasicMaterial({color: 0xffeeff});
              var material2 = new THREE.MeshBasicMaterial({color: 0xBBBBff});
              var mat_black = new THREE.MeshBasicMaterial({color: 0x000000});
@@ -56,7 +53,6 @@
          }
          
          function onDocumentMouseMove(event){
-			 /* event.preventDefault();*/
              /* convert to cartesian coordinate */
              /* center = (0, 0), positive dir = up, right */
 			 mouse.x = r * ((event.clientX / width) * 2 - 1);
@@ -64,10 +60,10 @@
 			 mouse.y = r * (-(event.clientY - height / 2) / width) * 2;
              /* -r/aspect  <= mouse.y < r/aspect */
              point.position.set(mouse.x, mouse.y, 0);
-             document.getElementById("info").innerHTML = 
-                 "window size = (" + width + ", " + height + "), " +
-                 "event x: " + event.clientX + ", y: " + event.clientY +
-                 ", mouse x: " + mouse.x + ", y: " + mouse.y;
+             /* document.getElementById("info").innerHTML = 
+              *     "window size = (" + width + ", " + height + "), " +
+              *     "event x: " + event.clientX + ", y: " + event.clientY +
+              *     ", mouse x: " + mouse.x + ", y: " + mouse.y;*/
              
 		 }
          
