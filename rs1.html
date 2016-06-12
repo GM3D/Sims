@@ -9,9 +9,14 @@
 		</style>
 	</head>
 	<body>
+        <p id="info">window_size (x, y), point position (x, y), mouse position (x, y)</p>
 		<script src="js/three.js"></script>
 		<script>
-         var mouse, scene, camera, renderer, raycaster;
+         var container, mouse, scene, camera, renderer;
+         var point;
+         var width = window.innerWidth;
+         var height = window.innerHeight;
+         var r = 4.0;
 
          init();
          animate();
@@ -19,16 +24,16 @@
          function init(){
              mouse = new THREE.Vector2();
              scene = new THREE.Scene();
-             var width = window.innerWidth;
-             var height = window.innerHeight;
              var aspect = width/height;
              camera = new 
              /* THREE.PerspectiveCamera(75, window.innerWidth 
               *     / window.innerHeight, 0.1, 1000 );*/
-             THREE.OrthographicCamera(-5*aspect, 5*aspect, 5.0, -5.0, 1, 1000);
+             THREE.OrthographicCamera(-r*aspect, r*aspect, r, -r, 1, 1000);
              raycaster = new THREE.Raycaster();
              renderer = new THREE.WebGLRenderer();
              renderer.setSize(width, height);
+             /* projector = new THREE.Projector();*/
+             container = document.getElementById('ThreeJS');
              document.addEventListener('mousemove', 
                                        onDocumentMouseMove, false);
              document.body.appendChild( renderer.domElement );
@@ -39,7 +44,7 @@
              var mat_black = new THREE.MeshBasicMaterial({color: 0x000000});
              var w_plane = new THREE.Mesh(geometry, material);
              var xy_plane = new THREE.Mesh(geometry, material2);
-             var point = new THREE.Mesh(circle_geom, mat_black);
+             point = new THREE.Mesh(circle_geom, mat_black);
              w_plane.position.x -= 2.5;
              xy_plane.position.x += 2.5;
              point.position.x -= 2.5;
@@ -47,17 +52,23 @@
              scene.add(xy_plane);
              scene.add(point);
              camera.position.z = 5;
+             console.log("end of initialization.");
          }
          
          function onDocumentMouseMove(event){
 			 /* event.preventDefault();*/
              /* convert to cartesian coordinate */
              /* center = (0, 0), positive dir = up, right */
-			 mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-             /* -1.0 <= mouse.x < 1.0 */
-			 mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-             /* -1.0 <= mouse.y < 1.0 */
-             point.position.set(event.clientX, event.clientY, 0);
+			 mouse.x = r * ((event.clientX / width) * 2 - 1);
+             /* -r <= mouse.x < r */
+			 mouse.y = r * (-(event.clientY - height / 2) / width) * 2;
+             /* -r/aspect  <= mouse.y < r/aspect */
+             point.position.set(mouse.x, mouse.y, 0);
+             document.getElementById("info").innerHTML = 
+                 "window size = (" + width + ", " + height + "), " +
+                 "event x: " + event.clientX + ", y: " + event.clientY +
+                 ", mouse x: " + mouse.x + ", y: " + mouse.y;
+             
 		 }
          
          function render(){
@@ -65,7 +76,6 @@
          }
 
          function update(){
-             
          }
 
          function animate(){
