@@ -12,7 +12,8 @@
         <!-- <p id="info">window_size (x, y), point position (x, y), mouse position (x, y)</p> -->
 		<script src="js/three.js"></script>
 		<script>
-         var container, mouse, scene, camera, renderer;
+         var container, mouse, scene1, scene2, 
+             camera1, camera2, renderer;
          var point;
          var width = window.innerWidth;
          var height = window.innerHeight;
@@ -28,17 +29,21 @@
              mouse = new THREE.Vector2();
              prev = new THREE.Vector2();
              delta = new THREE.Vector2();
-             scene = new THREE.Scene();
-             var aspect = width/height;
-             camera = new 
-             THREE.OrthographicCamera(-r, r, r/aspect, -r/aspect, 1, 1000);
-             raycaster = new THREE.Raycaster();
+             scene1 = new THREE.Scene();
+             scene2 = new THREE.Scene();
+             var aspect = height / width;
+             camera1 = new 
+             THREE.OrthographicCamera(-r / 2, r / 2, 
+                                      r * aspect, -r * aspect, 1, 1000);
+             camera2 = new 
+             THREE.OrthographicCamera(-r /2 , r / 2 ,
+                                      r * aspect, -r * aspect, 1, 1000);
              renderer = new THREE.WebGLRenderer();
              renderer.setSize(width, height);
              container = document.getElementById('ThreeJS');
              document.addEventListener('mousemove', 
                                        onDocumentMouseMove, false);
-             document.body.appendChild( renderer.domElement );
+             document.body.appendChild(renderer.domElement);
              var geometry = new THREE.PlaneGeometry(4, 4);
              var point_geom = new THREE.CircleGeometry(0.05, 16);
              var material = new THREE.MeshBasicMaterial({color: 0xffeeff});
@@ -47,21 +52,20 @@
              var w_plane = new THREE.Mesh(geometry, material);
              var xy_plane = new THREE.Mesh(geometry, material2);
              point = new THREE.Mesh(point_geom, mat_black);
-             w_plane.position.x -= 2.5;
-             xy_plane.position.x += 2.5;
-             point.position.x -= 2.5;
-             scene.add(w_plane);
-             scene.add(xy_plane);
-             scene.add(point);
-             draw_cuts();
-             camera.position.z = 5;
+             scene1.add(w_plane);
+             scene2.add(xy_plane);
+             scene1.add(point);
+             draw_cuts(0, 0, 1.0);
+             camera1.position.z = 5;
+             camera2.position.z = 5;
+             scene1.add(camera1);
+             scene2.add(camera2);
              console.log("end of initialization.");
          }
 
-         function draw_cuts(){
+         function draw_cuts(x, y, r){
              var circle_width = 4;
-             var r = 1.0;
-             var x = -2.5, y = 0, z = 1;
+             var z = 1;
              draw_arc(x, y, r,
                          0, Math.PI / 2, 
                          {color: 0xFF0000}, circle_width, true);
@@ -103,11 +107,8 @@
              material.linewidth = width
              material.dashSize = 100;
              material.gapSize = 20;
-             /* material = new THREE.LineDashedcMaterial(color, width);*/
-             console.log("dashed = " + dashed);
-             console.log("color = " + color);
              var line = new THREE.Line(geometry, material);
-             scene.add(line);
+             scene1.add(line);
          }
          
          function draw_lined_circle(x, y, r, width, color1, color2)
@@ -122,28 +123,36 @@
                       0, Math.PI * 2, 
                       color2,
                       width, false);
-             scene.add(pole);
+             scene1.add(pole);
          }
 
          function onDocumentMouseMove(event){
              /* convert to cartesian coordinate */
              /* center = (0, 0), positive dir = up, right */
              prev = mouse;
-			 mouse.x = r * ((event.clientX / width) * 2 - 1);
+			 mouse.x = r * ((event.clientX / width) * 2 - 1) + r / 2;
              /* -r <= mouse.x < r */
 			 mouse.y = r * (-(event.clientY - height / 2) / width) * 2;
              delta = prev - mouse;
-             /* -r/aspect  <= mouse.y < r/aspect */
+             /* -r * aspect  <= mouse.y < r * aspect */
              point.position.set(mouse.x, mouse.y, 0);
              /* document.getElementById("info").innerHTML = 
               *     "window size = (" + width + ", " + height + "), " +
               *     "event x: " + event.clientX + ", y: " + event.clientY +
               *     ", mouse x: " + mouse.x + ", y: " + mouse.y;*/
-             
 		 }
          
          function render(){
-	         renderer.render(scene, camera);
+             // render left area
+             renderer.setViewport(0, 0, 0.5 * width, height);
+             renderer.setScissor(0, 0, 0.5 * width, height);
+             renderer.setScissorTest(true);
+	         renderer.render(scene1, camera1);
+             // render right area
+             renderer.setViewport(0.5 * width, 0, 0.5 * width, height);
+             renderer.setScissor(0.5 * width, 0, 0.5 * width, height);
+             renderer.setScissorTest(true);
+	         renderer.render(scene2, camera2);
          }
 
          function update(){
