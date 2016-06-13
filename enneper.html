@@ -35,23 +35,91 @@
                                        onDocumentMouseMove, false);
              document.body.appendChild( renderer.domElement );
              var geometry = new THREE.PlaneGeometry(4, 4);
-             var circle_geom = new THREE.CircleGeometry(0.05, 16);
+             var point_geom = new THREE.CircleGeometry(0.05, 16);
              var material = new THREE.MeshBasicMaterial({color: 0xffeeff});
              var material2 = new THREE.MeshBasicMaterial({color: 0xBBBBff});
              var mat_black = new THREE.MeshBasicMaterial({color: 0x000000});
              var w_plane = new THREE.Mesh(geometry, material);
              var xy_plane = new THREE.Mesh(geometry, material2);
-             point = new THREE.Mesh(circle_geom, mat_black);
+             point = new THREE.Mesh(point_geom, mat_black);
              w_plane.position.x -= 2.5;
              xy_plane.position.x += 2.5;
              point.position.x -= 2.5;
              scene.add(w_plane);
              scene.add(xy_plane);
              scene.add(point);
+             draw_cuts();
              camera.position.z = 5;
              console.log("end of initialization.");
          }
+
+         function draw_cuts(){
+             var circle_width = 4;
+             var r = 1.0;
+             var x = -2.5, y = 0, z = 1;
+             draw_arc(x, y, r,
+                         0, Math.PI / 2, 
+                         {color: 0xFF0000}, circle_width, true);
+             draw_arc(x, y, r,
+                         Math.PI / 2, Math.PI,
+                         {color: 0x808080}, circle_width, true);
+             draw_arc(x, y, r,
+                         Math.PI, Math.PI * 1.5,
+                         {color: 0x00FF00}, circle_width, true);
+             draw_arc(x, y, r,
+                         Math.PI * 1.5, Math.PI * 2.0,
+                         {color: 0x0000FF}, circle_width, true);
+             var color_white = {color: 0xFFFFFF};
+             var color_black = {color: 0x000000};
+             var r_pole = 0.05, width_pole = 4;
+             draw_lined_circle(x - r, y, r_pole, width_pole,
+                               color_white, color_black);
+             draw_lined_circle(x + r, y, r_pole, width_pole,
+                               color_white, color_black);
+             draw_lined_circle(x, y - r, r_pole, width_pole,
+                               color_white, color_black);
+             draw_lined_circle(x, y + r, r_pole, width_pole,
+                               color_white, color_black);
+         }
          
+         function draw_arc(x, y, r, start, end, color, width, dashed){
+             var curve = new THREE.EllipseCurve(
+                 x, y, r, r, start, end, false);
+             var points = curve.getSpacedPoints(40);
+             var path = new THREE.Path();
+             var geometry = path.createGeometry(points);
+             var material;
+             options = {dashSize: 12, gapSize: 3};
+             if(dashed){
+                 material = new THREE.LineDashedMaterial(color, width);
+             }else{
+                 material = new THREE.LineBasicMaterial(color, width);
+             }
+             material.linewidth = width
+             material.dashSize = 100;
+             material.gapSize = 20;
+             /* material = new THREE.LineDashedcMaterial(color, width);*/
+             console.log("dashed = " + dashed);
+             console.log("color = " + color);
+             var line = new THREE.Line(geometry, material);
+             scene.add(line);
+         }
+         
+         function draw_lined_circle(x, y, r, width, color1, color2)
+         {
+             var mat_color1 = new THREE.MeshBasicMaterial(color1);
+             var mat_color2 = new THREE.MeshBasicMaterial(color2);
+             var geom_pole = new THREE.CircleGeometry(r, 16);
+             var pole = new THREE.Mesh(geom_pole, mat_color1);
+             var z = 1.0;
+             pole.position.set(x, y, z);
+             draw_arc(x, y, r,
+                      0, Math.PI * 2, 
+                      color2,
+                      width, false);
+             scene.add(pole);
+         }
+
          function onDocumentMouseMove(event){
              /* convert to cartesian coordinate */
              /* center = (0, 0), positive dir = up, right */
