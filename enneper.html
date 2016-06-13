@@ -17,12 +17,17 @@
          var width = window.innerWidth;
          var height = window.innerHeight;
          var r = 5.0;
+         // previous mouse position and increment from current position.
+         var prev, delta;
+
 
          init();
          animate();
 
          function init(){
              mouse = new THREE.Vector2();
+             prev = new THREE.Vector2();
+             delta = new THREE.Vector2();
              scene = new THREE.Scene();
              var aspect = width/height;
              camera = new 
@@ -123,9 +128,11 @@
          function onDocumentMouseMove(event){
              /* convert to cartesian coordinate */
              /* center = (0, 0), positive dir = up, right */
+             prev = mouse;
 			 mouse.x = r * ((event.clientX / width) * 2 - 1);
              /* -r <= mouse.x < r */
 			 mouse.y = r * (-(event.clientY - height / 2) / width) * 2;
+             delta = prev - mouse;
              /* -r/aspect  <= mouse.y < r/aspect */
              point.position.set(mouse.x, mouse.y, 0);
              /* document.getElementById("info").innerHTML = 
