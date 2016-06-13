@@ -17,11 +17,11 @@
          var point;
          var width = window.innerWidth;
          var height = window.innerHeight;
+         var aspect = height / width;
          // r; world scale. world width is exactly 2 * r
          var r = 5.0;
          // previous mouse position and increment from current position.
          var prev, delta;
-
 
          init();
          animate();
@@ -30,7 +30,6 @@
              mouse = new THREE.Vector2();
              prev = new THREE.Vector2();
              delta = new THREE.Vector2();
-             var aspect = height / width;
              renderer = new THREE.WebGLRenderer();
              renderer.setSize(width, height);
              container = document.getElementById('ThreeJS');
@@ -59,13 +58,23 @@
          function setup_scene1(){
              var geometry = new THREE.PlaneGeometry(4, 4);
              var point_geom = new THREE.CircleGeometry(0.05, 16);
-             var material = new THREE.MeshBasicMaterial({color: 0xffeeff});
+             var mat_ivory = new THREE.MeshBasicMaterial({color: 0xffeeff});
              var mat_black = new THREE.MeshBasicMaterial({color: 0x000000});
-             var w_plane = new THREE.Mesh(geometry, material);
+             var w_plane = new THREE.Mesh(geometry, mat_ivory);
              scene1.add(w_plane);
              point = new THREE.Mesh(point_geom, mat_black);
              scene1.add(point);
              draw_cuts(0, 0, 1.0);
+             var text2 = document.createElement('div');
+             text2.style.position = 'absolute';
+             //text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
+             text2.style.width = 100;
+             text2.style.height = 100;
+             text2.style.backgroundColor = "0xffeeff";
+             text2.innerHTML = "+1";
+             text2.style.top = height * (0.5 - 0.01) + 'px';
+             text2.style.left =(3/8 - 0.01) * width + 'px';
+             document.body.appendChild(text2);
          }
 
          function setup_scene2(){
