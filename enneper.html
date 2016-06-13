@@ -17,6 +17,7 @@
          var point;
          var width = window.innerWidth;
          var height = window.innerHeight;
+         // r; world scale. world width is exactly 2 * r
          var r = 5.0;
          // previous mouse position and increment from current position.
          var prev, delta;
@@ -29,38 +30,50 @@
              mouse = new THREE.Vector2();
              prev = new THREE.Vector2();
              delta = new THREE.Vector2();
-             scene1 = new THREE.Scene();
-             scene2 = new THREE.Scene();
              var aspect = height / width;
-             camera1 = new 
-             THREE.OrthographicCamera(-r / 2, r / 2, 
-                                      r * aspect, -r * aspect, 1, 1000);
-             camera2 = new 
-             THREE.OrthographicCamera(-r /2 , r / 2 ,
-                                      r * aspect, -r * aspect, 1, 1000);
              renderer = new THREE.WebGLRenderer();
              renderer.setSize(width, height);
              container = document.getElementById('ThreeJS');
              document.addEventListener('mousemove', 
                                        onDocumentMouseMove, false);
              document.body.appendChild(renderer.domElement);
+             scene1 = new THREE.Scene();
+             scene2 = new THREE.Scene();
+             setup_scene1();
+             setup_scene2();
+             camera1 = new 
+             THREE.OrthographicCamera(-r / 2, r / 2, 
+                                      r * aspect, -r * aspect,
+                                      1, 1000);
+             camera1.position.z = 5;
+             scene1.add(camera1);
+             camera2 = new 
+             THREE.OrthographicCamera(-r /2 , r / 2 ,
+                                      r * aspect, -r * aspect,
+                                      1, 1000);
+             camera2.position.z = 5;
+             scene2.add(camera2);
+             console.log("end of initialization.");
+         }
+
+         function setup_scene1(){
              var geometry = new THREE.PlaneGeometry(4, 4);
              var point_geom = new THREE.CircleGeometry(0.05, 16);
              var material = new THREE.MeshBasicMaterial({color: 0xffeeff});
-             var material2 = new THREE.MeshBasicMaterial({color: 0xBBBBff});
              var mat_black = new THREE.MeshBasicMaterial({color: 0x000000});
              var w_plane = new THREE.Mesh(geometry, material);
-             var xy_plane = new THREE.Mesh(geometry, material2);
-             point = new THREE.Mesh(point_geom, mat_black);
              scene1.add(w_plane);
-             scene2.add(xy_plane);
+             point = new THREE.Mesh(point_geom, mat_black);
              scene1.add(point);
              draw_cuts(0, 0, 1.0);
-             camera1.position.z = 5;
-             camera2.position.z = 5;
-             scene1.add(camera1);
-             scene2.add(camera2);
-             console.log("end of initialization.");
+         }
+
+         function setup_scene2(){
+             var mat_white = new THREE.MeshBasicMaterial({color: 0xFFFFFF});
+             var material2 = new THREE.MeshBasicMaterial({color: 0xBBBBff});
+             var geometry = new THREE.PlaneGeometry(1, 1);
+             var xy_plane = new THREE.Mesh(geometry, material2);
+             scene2.add(xy_plane);
          }
 
          function draw_cuts(x, y, r){
