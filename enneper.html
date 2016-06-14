@@ -14,7 +14,7 @@
 		<script>
          var container, mouse, scene1, scene2, 
              camera1, camera2, renderer;
-         var point;
+         var point, point2;
          var width = window.innerWidth;
          var height = window.innerHeight;
          var aspect = height / width;
@@ -65,41 +65,62 @@
              point = new THREE.Mesh(point_geom, mat_black);
              scene1.add(point);
              draw_cuts(0, 0, 1.0);
-             var text2 = document.createElement('div');
-             text2.style.position = 'absolute';
-             //text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
-             text2.style.width = 100;
-             text2.style.height = 100;
-             text2.style.backgroundColor = "0xffeeff";
-             text2.innerHTML = "+1";
-             text2.style.top = height * (0.5 - 0.01) + 'px';
-             text2.style.left =(3/8 - 0.01) * width + 'px';
-             document.body.appendChild(text2);
+             label_data1 = [
+                 {text: "+1", bg_color: "0xffeeff",
+                  top: 0.5 - 0.01, left: 3/8 - 0.01},
+                 {text: "-1", bg_color: "0xffeeff",
+                  top: 0.5 - 0.01, left: 1/8 - 0.01},
+                 {text: "+i", bg_color: "0xffeeff",
+                  top: 0.33 - 0.01, left: 1/4 - 0.01},
+                 {text: "-i", bg_color: "0xffeeff",
+                  top: 0.67 - 0.01, left: 1/4 - 0.01}
+             ];
+             setup_labels(label_data1);
          }
 
          function setup_scene2(){
-             var mat_checker = new Array(
-                 new THREE.MeshBasicMaterial({color: 0xFFFFFF}),
-                 new THREE.MeshBasicMaterial({color: 0xBBBBff}));
+             var colors = [0xFFFFFF, 0xBBBBFF];
              var geometry = new THREE.PlaneGeometry(1, 1);
-             xy_tiles = [];
-             var i0 = 4, j0 = 4;
+             var i0 = 4
+             var j0 = 4;
+             var xy_tiles = [];
              for(i = 0; i < i0; i++){
-                 xy_tiles.push([]);
+                 xy_tiles[i] = [];
                  for(j = 0; j < j0; j++){
-                     xy_tiles[i].push(new THREE.Mesh(
-                         geometry, mat_checker[(i + j) % 2]));
+                     var color_opt = {color: colors[(i + j) % 2]};
+                     var mat = new THREE.MeshBasicMaterial(color_opt);
+                     xy_tiles[i][j] = new THREE.Mesh(geometry, mat);
                      xy_tiles[i][j].position.set(i - i0 / 2 + 0.5,
                                                  j - j0 / 2 + 0.5,
                                                  0);
                      scene2.add(xy_tiles[i][j]);
-                     
+                     /* label_data = {text: "S(" + i - i0 + ", " + j - j0 + ")",
+                      *               bg_color: colors[(i + j) % 2],
+                      *               top: i,
+                      *               left: j};
+                      * xy_labels = [label_data];
+                      * setup_labels(xy_labels);*/
                  }
              }
              var point_geom = new THREE.CircleGeometry(0.05, 16);
              var mat_black = new THREE.MeshBasicMaterial({color: 0x000000});
              point2 = new THREE.Mesh(point_geom, mat_black);
              scene2.add(point2);
+         }
+
+         function setup_labels(label_data){
+             var labels = []
+             for(i = 0; i < label_data.length; i++){
+                 labels.push(document.createElement('div'));
+                 labels[i].style.position = 'absolute';
+                 labels[i].style.width = 100;
+                 labels[i].style.height = 100;
+                 labels[i].style.backgroundColor = label_data[i].bg_color;
+                 labels[i].innerHTML = label_data[i].text;
+                 labels[i].style.top = height * label_data[i].top + 'px';
+                 labels[i].style.left = width * label_data[i].left + 'px';
+                 document.body.appendChild(labels[i]);
+             }
          }
 
          function draw_cuts(x, y, r){
