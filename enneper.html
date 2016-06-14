@@ -106,6 +106,19 @@
              var mat_black = new THREE.MeshBasicMaterial({color: 0x000000});
              point2 = new THREE.Mesh(point_geom, mat_black);
              scene2.add(point2);
+             label_data = [];
+             for(i = 0; i < i0; i++){
+                 for(j = 0; j < j0; j++){
+                     if((i + j)%2 == 1){
+                         label_data.push({
+                             text: "S(" + (1 - i) + ", " + (j - 2) + ")",
+                             bg_color: colors[(i + j) % 2],
+                             top: i * 0.2 + 0.19,
+                             left: j * 0.1 + 0.59});
+                     }
+                 }
+             }
+             setup_labels(label_data);
          }
 
          function setup_labels(label_data){
