@@ -22,6 +22,9 @@
          var r = 5.0;
          // previous mouse position and increment from current position.
          var prev, delta;
+         // displacement and it's angle from 1, -1, i, -i respectively
+         var v, args;
+         var p, ps = [1, 0, -1, 0, 0, 1, 0, -1];
 
          init();
          animate();
@@ -30,6 +33,13 @@
              mouse = new THREE.Vector2();
              prev = new THREE.Vector2();
              delta = new THREE.Vector2();
+             v = [];
+             p = [];
+             for(i = 0; i < 4; i++){
+                 v[i] = new THREE.Vector2();
+                 p[i] = new THREE.Vector2(ps[2 * i], ps[2*i + 1]);
+             }
+             args = [];
              renderer = new THREE.WebGLRenderer();
              renderer.setSize(width, height);
              container = document.getElementById('ThreeJS');
@@ -213,7 +223,16 @@
               *     "window size = (" + width + ", " + height + "), " +
               *     "event x: " + event.clientX + ", y: " + event.clientY +
               *     ", mouse x: " + mouse.x + ", y: " + mouse.y;*/
-             point2.position.set(mouse.x, mouse.y, 0);
+             for(i = 0; i < 4; i++){
+                 v[i].subVectors(mouse, p[i]);
+                 args[i] = Math.atan2(v[i].x, v[i].y);
+             }
+             var x = (args[0] - args[1]) / Math.PI - 0.1;
+             var y = (args[2] - args[3]) / Math.PI - 0.1;
+             console.log("w = " + mouse.toSource());
+             console.log("args = " + args.toSource());
+             console.log("x, y = " + x + ", " + y);
+             point2.position.set(x, y, 0);
 		 }
          
          function render(){
