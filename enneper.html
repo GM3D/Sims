@@ -16,8 +16,19 @@
          var scene1, scene2, 
              camera1, camera2, renderer;
          var point, point2;
+         var point_geom = new THREE.CircleGeometry(0.05, 16);
+         var mat_black = new THREE.MeshBasicMaterial({color: 0x000000});
+         point2 = new THREE.Mesh(point_geom, mat_black);
+         
+         // guiding lines
+         var gl1, gl2;
+         var gl1_geom = new THREE.Path();
+         var gl2_geom = new THREE.Path();
+         
+
          var width = window.innerWidth;
          var height = window.innerHeight;
+         // 0.0 <= aspect <= 1.0
          var aspect = height / width;
          // r; world scale. world width is exactly 2 * r
          var r = 5.0;
@@ -27,25 +38,25 @@
          var v, args0, args, prev_args;
          var p, ps = [0, -1, 0, 1, -1, 0, 1, 0];
 
+
          init();
          animate();
 
          function init(){
-             w = new THREE.Vector2();
-             prev = new THREE.Vector2();
-             delta = new THREE.Vector2();
+             w = new THREE.Vector2(0, 0);
+             prev = new THREE.Vector2(0, 0);
+             delta = new THREE.Vector2(0, 0);
              v = [];
              p = [];
              for(i = 0; i < 4; i++){
                  v[i] = new THREE.Vector2();
                  p[i] = new THREE.Vector2(ps[2 * i], ps[2*i + 1]);
              }
-             args0 = [0, 0, 0, 0];
-             args = [0, 0, 0, 0];
-             prev_args = [0, 0, 0, 0];
+             args0 = [PI/2, 3*PI/2, 0, -PI];
+             args = [PI/2, 3*PI/2, 0, -PI];
+             prev_args = [PI/2, 3*PI/2, 0, -PI];
              renderer = new THREE.WebGLRenderer();
              renderer.setSize(width, height);
-             container = document.getElementById('ThreeJS');
              document.addEventListener('mousemove', 
                                        onDocumentMouseMove, false);
              document.body.appendChild(renderer.domElement);
@@ -78,6 +89,7 @@
              point = new THREE.Mesh(point_geom, mat_black);
              scene1.add(point);
              draw_cuts(0, 0, 1.0);
+             /* draw_aux_lines();*/
              label_data1 = [
                  {text: "+1", bg_color: "0xffeeff",
                   top: 0.5 - 0.01, left: 3/8 - 0.01},
@@ -109,10 +121,6 @@
                      scene2.add(xy_tiles[i][j]);
                  }
              }
-             var point_geom = new THREE.CircleGeometry(0.05, 16);
-             var mat_black = new THREE.MeshBasicMaterial({color: 0x000000});
-             point2 = new THREE.Mesh(point_geom, mat_black);
-             scene2.add(point2);
              label_data = [];
              for(i = 0; i < i0; i++){
                  for(j = 0; j < j0; j++){
@@ -126,6 +134,7 @@
                  }
              }
              setup_labels(label_data);
+             scene2.add(point2);
          }
 
          function setup_labels(label_data){
@@ -171,6 +180,28 @@
                                color_white, color_black);
          }
          
+         function draw_aux_lines(){
+             var width = 1;
+
+             var color1 = {color: 0x0000AA};
+             var line_mat1 = new THREE.LineBasicMaterial(color1, width);
+             var geometry1 = new THREE.Geometry();
+             geometry1.vertices.push(p[0].x, p[0].y, 0);
+             geometry1.vertices.push(w.x, w.y, 0);
+             geometry1.vertices.push(p[1].x, p[1].y, 0);
+             var line1 = new THREE.Line(geometry1, mat1);
+             scene1.add(line1);
+
+             var color2 = {color: 0xAA0000};
+             var line_mat2 = new THREE.LineBasicMaterial(color2, width);
+             var geometry2 = new THREE.Geometry();
+             geometry2.vertices.push(p[2].x, p[2].y, 0);
+             geometry2.vertices.push(w.x, w.y, 0);
+             geometry2.vertices.push(p[3].x, p[3].y, 0);
+             var line2 = new THREE.Line(geometry2, mat2);
+             scene1.add(line2);
+         }
+
          function draw_arc(x, y, r, start, end, color, width, dashed){
              var curve = new THREE.EllipseCurve(
                  x, y, r, r, start, end, false);
@@ -206,10 +237,6 @@
              scene1.add(pole);
          }
 
-         function datan(y, x){
-             return - x^2 / (x^2 + y^2);
-         }
-
          function onDocumentMouseMove(event){
              /* convert to cartesian coordinate */
              /* center = (0, 0), positive dir = up, right */
@@ -217,6 +244,7 @@
 			 w.x = r * ((event.clientX / width) * 2 - 1) + r / 2;
              /* -r <= w.x < r */
 			 w.y = r * (-(event.clientY - height / 2) / width) * 2;
+             // delta = prev - w
              delta.subVectors(prev, w);
              /* -r * aspect  <= w.y < r * aspect */
              point.position.set(w.x, w.y, 0);
@@ -233,6 +261,8 @@
              args0[1] = into_range(0, 2.0*PI, args0[1]);
              args0[2] = into_range(-0.5*PI, 1.5*PI, args0[2]);
              args0[3] = into_range(-0.5*PI, 1.5*PI, args0[3]);
+             // dargs = small diff of args constrained to move
+             // smoothly
              var dargs = [];
              for(i = 0; i < 4; i++){
                  var r2 = v[i].lengthSq();
@@ -240,8 +270,7 @@
                  dargs[i] = (delta.x * v[i].y - delta.y * v[i].x) / r2;
                  args[i] += dargs[i]
              }
-             /* var x = (args0[0] - args0[1]) / PI + 0.5;
-              * var y = (args0[2] - args0[3]) / PI + 0.5;*/
+             // (x, y): mapped position of w in unit of pi
              var x = (args[0] - args[1]) / PI + 0.5;
              var y = (args[2] - args[3]) / PI + 0.5;
              console.log("w = " + w.toSource());
