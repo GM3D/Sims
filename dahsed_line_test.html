@@ -12,8 +12,13 @@
         <!-- <p id="info">window_size (x, y), point position (x, y), w position (x, y)</p> -->
 		<script src="js/three.js"></script>
 		<script>
+         "use strict";
+         var mouse;
          var scene, camera, renderer;
-         var point
+         var point, ppos;
+         var x, y;
+         var point0;
+         var line, line_geom;
 
          var width = window.innerWidth;
          var height = window.innerHeight;
@@ -23,6 +28,12 @@
          animate();
 
          function init(){
+             mouse = new THREE.Vector2(0, 0);
+             ppos = new THREE.Vector3(0, 0, 0);
+             point0 = new THREE.Vector3(0, 0, 0);
+             x = y = 0;
+             console.log("ppos:1 = " + ppos.x + ", " + ppos.y + 
+                         ", " + ppos.z);
              renderer = new THREE.WebGLRenderer();
              renderer.setSize(width, height);
              document.addEventListener('mousemove', 
@@ -30,10 +41,12 @@
              document.body.appendChild(renderer.domElement);
              scene = new THREE.Scene();
              setup_scene();
+
              camera = new 
              THREE.OrthographicCamera(-r, r,
                                       r * aspect, -r * aspect,
                                       1, 1000);
+
              camera.position.z = 5;
              scene.add(camera);
              console.log("end of initialization.");
@@ -49,13 +62,46 @@
              var mat_black = new THREE.MeshBasicMaterial({color: 0x000000});
              point = new THREE.Mesh(point_geom, mat_black);
              scene.add(point);
+
+             line_geom = new THREE.Geometry();
+             line_geom.dynacmic = true;
+             line_geom.vertices.push(point0);
+             line_geom.vertices.push(ppos);
+             line_geom.computeLineDistances();
+             var line_mat = new THREE.LineDashedMaterial(
+                 {color: 0x8888FF, dashSize: 1, gapSize: 3});
+             line = new THREE.Line(line_geom, line_mat);
+             scene.add(line);
+             console.log("ppos:2 = " + ppos.x + ", " + ppos.y + 
+                         ", " + ppos.z);
+
          }
 
          function onDocumentMouseMove(event){
-			 var x = r * ((event.clientX / width) * 2 - 1);
-			 var y = r * (-(event.clientY - height / 2) / width) * 2;
-             console.log("x, y = " + x + ", " + y);
-             point.position.set(x, y, 0);
+             mouse.set(event.clientX, event.clientY);
+             x = event.clientX;
+             y = event.clientY;
+             console.log("ppos:3 = " + ppos.x + ", " + ppos.y + 
+                         ", " + ppos.z);
+             console.log("(x, y):3 = " + x + ", " + y);
+
+			 ppos.setX(r * ((mouse.x / width) * 2 - 1));
+			 ppos.setY(r * (-(mouse.y - height / 2) / width) * 2);
+
+			 x = (r * ((mouse.x / width) * 2 - 1));
+			 y = (r * (-(mouse.y - height / 2) / width) * 2);
+
+             // no idea why setting z here is required.
+			 /* ppos.z = 0;*/
+             console.log("ppos:4 = " + ppos.x + ", " + ppos.y + 
+                         ", " + ppos.z);
+             console.log("(x, y):4 = " + x + ", " + y);
+             /* point.position.copy(ppos);*/
+             point.position.x = x;
+             point.position.y = y;
+             line.geometry.vertices[1].setX(x);
+             line.geometry.vertices[1].setY(y);
+             line.geometry.verticesNeedUpdate = true;
 		 }
          
          function render(){
