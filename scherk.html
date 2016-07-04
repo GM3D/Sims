@@ -2,42 +2,52 @@
 <html>
 	<head>
 		<meta charset=utf-8>
-		<title>Enneper's Rieman Surface</title>
+		<title>Scherk's Minimal Surface</title>
 		<style>
 			body { margin: 0; }
 			canvas { width: 100%; height: 100% }
 		</style>
 	</head>
 	<body>
-        <!-- <p id="info">window_size (x, y), point position (x, y), w position (x, y)</p> -->
+        <!-- <p id="info">debug info shown here</p> -->
 		<script src="js/three.js"></script>
 		<script>
+         // everyone loves pi.
          var PI = Math.PI;
-         var scene1, scene2, 
-             camera1, camera2, renderer;
-         var point, point2;
-         var point_geom = new THREE.CircleGeometry(0.05, 16);
-         var mat_black = new THREE.MeshBasicMaterial({color: 0x000000});
-         point2 = new THREE.Mesh(point_geom, mat_black);
-         
-         // guiding lines
-         var gl1, gl2;
-         var gl1_geom = new THREE.Path();
-         var gl2_geom = new THREE.Path();
-         
-
          var width = window.innerWidth;
          var height = window.innerHeight;
          // 0.0 <= aspect <= 1.0
          var aspect = height / width;
-         // r; world scale. world width is exactly 2 * r
-         var r = 5.0;
-         // previous w position and increment from current position.
-         var w, prev, delta;
-         // displacement and it's angle from 1, -1, i, -i respectively
-         var v, args0, args, prev_args;
-         var p, ps = [0, -1, 0, 1, -1, 0, 1, 0];
 
+         // left part and right part are treated as separatea scenes.
+         var scene1, camera1;
+         var scene2, camera2;
+         // using common  renderer since two renderers in one canvas
+         // does not seem to be supported.
+         var renderer;
+
+         var dot, dot2;
+         // guiding lines on scene1
+         var gl1, gl2;
+
+         // r; world scale. world width is exactly 2 * r
+         // with x = -r to +r
+         var r = 5.0;
+
+         // w: complex parameter for Scherk's minimal surface.
+         // previous w and increment from prev value.
+         var w, prev, delta;
+
+         // ps: fixed points 1, -1, i, -i respectively
+         // p: contains them in Vector2 array
+         var ps = [0, -1, 0, 1, -1, 0, 1, 0];
+         var p;
+
+         // w's displacement from p[i]'s
+         var v;
+         // and angles of v measured from the direction of positive x-axis
+         // along with its initial value and increment.
+         var args0, args, prev_args;
 
          init();
          animate();
@@ -46,11 +56,11 @@
              w = new THREE.Vector2(0, 0);
              prev = new THREE.Vector2(0, 0);
              delta = new THREE.Vector2(0, 0);
-             v = [];
              p = [];
+             v = [];
              for(i = 0; i < 4; i++){
-                 v[i] = new THREE.Vector2();
                  p[i] = new THREE.Vector2(ps[2 * i], ps[2*i + 1]);
+                 v[i] = new THREE.Vector2();
              }
              args0 = [PI/2, 3*PI/2, 0, -PI];
              args = [PI/2, 3*PI/2, 0, -PI];
@@ -64,13 +74,15 @@
              scene2 = new THREE.Scene();
              setup_scene1();
              setup_scene2();
+             // camera1's view frustrum is exactly half the size
+             // of the internal space (of which width = 2*r)
              camera1 = new 
              THREE.OrthographicCamera(-r / 2, r / 2, 
                                       r * aspect, -r * aspect,
                                       1, 1000);
              camera1.position.z = 5;
              scene1.add(camera1);
-             camera2 = new 
+             camera2 = new
              THREE.OrthographicCamera(-r /2 , r / 2 ,
                                       r * aspect, -r * aspect,
                                       1, 1000);
@@ -80,16 +92,18 @@
          }
 
          function setup_scene1(){
-             var geometry = new THREE.PlaneGeometry(4, 4);
-             var point_geom = new THREE.CircleGeometry(0.05, 16);
+             var plane_geom = new THREE.PlaneGeometry(4, 4);
+             var dot_geom = new THREE.CircleGeometry(0.05, 16);
              var mat_ivory = new THREE.MeshBasicMaterial({color: 0xffeeff});
              var mat_black = new THREE.MeshBasicMaterial({color: 0x000000});
-             var w_plane = new THREE.Mesh(geometry, mat_ivory);
+             var w_plane = new THREE.Mesh(plane_geom, mat_ivory);
              scene1.add(w_plane);
-             point = new THREE.Mesh(point_geom, mat_black);
-             scene1.add(point);
-             draw_cuts(0, 0, 1.0);
-             /* draw_aux_lines();*/
+             dot = new THREE.Mesh(dot_geom, mat_black);
+             scene1.add(dot);
+
+             make_cuts(0, 0, 1.0);
+             /* make_aux_lines();
+              */
              label_data1 = [
                  {text: "+1", bg_color: "0xffeeff",
                   top: 0.5 - 0.01, left: 3/8 - 0.01},
@@ -105,7 +119,7 @@
 
          function setup_scene2(){
              var colors = [0xFFFFFF, 0xBBBBFF];
-             var geometry = new THREE.PlaneGeometry(1, 1);
+             var plane_geom = new THREE.PlaneGeometry(1, 1);
              var i0 = 4
              var j0 = 4;
              var xy_tiles = [];
@@ -114,7 +128,7 @@
                  for(j = 0; j < j0; j++){
                      var color_opt = {color: colors[(i + j) % 2]};
                      var mat = new THREE.MeshBasicMaterial(color_opt);
-                     xy_tiles[i][j] = new THREE.Mesh(geometry, mat);
+                     xy_tiles[i][j] = new THREE.Mesh(plane_geom, mat);
                      xy_tiles[i][j].position.set(i - i0 / 2 + 0.5,
                                                  j - j0 / 2 + 0.5,
                                                  0);
@@ -134,7 +148,12 @@
                  }
              }
              setup_labels(label_data);
-             scene2.add(point2);
+
+             var dot_geom = new THREE.CircleGeometry(0.05, 16);
+             var mat_black = new THREE.MeshBasicMaterial({color: 0x000000});
+             dot2 = new THREE.Mesh(dot_geom, mat_black);
+             scene2.add(dot2);
+
          }
 
          function setup_labels(label_data){
@@ -152,77 +171,85 @@
              }
          }
 
-         function draw_cuts(x, y, r){
+         function make_cuts(x, y, r){
              var circle_width = 4;
              var z = 1;
-             draw_arc(x, y, r,
+             make_arc(x, y, r,
                          0, PI / 2, 
-                         {color: 0xFF0000}, circle_width, true);
-             draw_arc(x, y, r,
+                         0xFF0000, circle_width, false);
+             make_arc(x, y, r,
                          PI / 2, PI,
-                         {color: 0x808080}, circle_width, true);
-             draw_arc(x, y, r,
+                         0x808080, circle_width, true);
+             make_arc(x, y, r,
                          PI, PI * 1.5,
-                         {color: 0x00FF00}, circle_width, true);
-             draw_arc(x, y, r,
+                         0x00FF00, circle_width, false);
+             make_arc(x, y, r,
                          PI * 1.5, PI * 2.0,
-                         {color: 0x0000FF}, circle_width, true);
-             var color_white = {color: 0xFFFFFF};
-             var color_black = {color: 0x000000};
+                         0x0000FF, circle_width, false);
+             var white = 0xFFFFFF;
+             var black = 0x000000;
              var r_pole = 0.05, width_pole = 4;
-             draw_lined_circle(x - r, y, r_pole, width_pole,
-                               color_white, color_black);
-             draw_lined_circle(x + r, y, r_pole, width_pole,
-                               color_white, color_black);
-             draw_lined_circle(x, y - r, r_pole, width_pole,
-                               color_white, color_black);
-             draw_lined_circle(x, y + r, r_pole, width_pole,
-                               color_white, color_black);
+             make_lined_circle(x - r, y, r_pole, width_pole,
+                               white, black);
+             make_lined_circle(x + r, y, r_pole, width_pole,
+                               white, black);
+             make_lined_circle(x, y - r, r_pole, width_pole,
+                               white, black);
+             make_lined_circle(x, y + r, r_pole, width_pole,
+                               white, black);
          }
          
-         function draw_aux_lines(){
+         function make_aux_lines(){
              var width = 1;
-
-             var color1 = {color: 0x0000AA};
-             var line_mat1 = new THREE.LineBasicMaterial(color1, width);
              var geometry1 = new THREE.Geometry();
+             geometry1.dynamic = true;
              geometry1.vertices.push(p[0].x, p[0].y, 0);
              geometry1.vertices.push(w.x, w.y, 0);
              geometry1.vertices.push(p[1].x, p[1].y, 0);
-             var line1 = new THREE.Line(geometry1, mat1);
-             scene1.add(line1);
+             geometry1.computeLineDistances();
+             var color1 = 0x0000AA;
+             var options = {color:color1, linewidth:width}
+             var line_mat1 = new THREE.LineBasicMaterial(options);
+             gl1 = new THREE.Line(geometry1, line_mat1);
+             scene1.add(gl1);
 
-             var color2 = {color: 0xAA0000};
-             var line_mat2 = new THREE.LineBasicMaterial(color2, width);
              var geometry2 = new THREE.Geometry();
+             geometry2.dynamic = true;
              geometry2.vertices.push(p[2].x, p[2].y, 0);
              geometry2.vertices.push(w.x, w.y, 0);
              geometry2.vertices.push(p[3].x, p[3].y, 0);
-             var line2 = new THREE.Line(geometry2, mat2);
-             scene1.add(line2);
+             geometry2.computeLineDistances();
+             var color2 = 0xAA0000;
+             var options = {color:color2, linewidth:width}
+             var line_mat2 = new THREE.LineBasicMaterial(options);
+             gl2 = new THREE.Line(geometry2, line_mat2);
+             scene1.add(gl2);
          }
 
-         function draw_arc(x, y, r, start, end, color, width, dashed){
+         function make_arc(x, y, r, start, end, color, width, dashed){
              var curve = new THREE.EllipseCurve(
                  x, y, r, r, start, end, false);
              var points = curve.getSpacedPoints(40);
              var path = new THREE.Path();
              var geometry = path.createGeometry(points);
+             geometry.computeLineDistances();
              var material;
-             options = {dashSize: 12, gapSize: 3};
              if(dashed){
-                 material = new THREE.LineDashedMaterial(color, width);
+                 options = {dashSize:0.1, gapSize:0.06, 
+                            color:color, linewidth:width};
+                 material = new THREE.LineDashedMaterial(options);
              }else{
-                 material = new THREE.LineBasicMaterial(color, width);
+                 options = {color:color, linewidth:width};
+                 material = new THREE.LineBasicMaterial(options);
              }
-             material.linewidth = width
-             material.dashSize = 100;
-             material.gapSize = 20;
+             /* material.linewidth = width*/
+             /* material.dashSize = 100;
+              * material.gapSize = 20;*/
              var line = new THREE.Line(geometry, material);
              scene1.add(line);
          }
          
-         function draw_lined_circle(x, y, r, width, color1, color2)
+         function make_lined_circle(x, y, r, width, color1, color2)
          {
              var mat_color1 = new THREE.MeshBasicMaterial(color1);
              var mat_color2 = new THREE.MeshBasicMaterial(color2);
@@ -230,7 +257,7 @@
              var pole = new THREE.Mesh(geom_pole, mat_color1);
              var z = 1.0;
              pole.position.set(x, y, z);
-             draw_arc(x, y, r,
+             make_arc(x, y, r,
                       0, PI * 2, 
                       color2,
                       width, false);
@@ -247,7 +274,7 @@
              // delta = prev - w
              delta.subVectors(prev, w);
              /* -r * aspect  <= w.y < r * aspect */
-             point.position.set(w.x, w.y, 0);
+             dot.position.set(w.x, w.y, 0);
              /* document.getElementById("info").innerHTML = 
               *     "window size = (" + width + ", " + height + "), " +
               *     "event x: " + event.clientX + ", y: " + event.clientY +
@@ -281,7 +308,8 @@
              console.log("dargs = " + dargs.toSource());
              console.log("args = " + args.toSource());
              console.log("x, y = " + x + ", " + y);
-             point2.position.set(x, y, 0);
+             /* console.log("dot2 = " + dot2.toSource());*/
+             dot2.position.set(x, y, 0);
 		 }
          
          function into_range(a, b, x){
