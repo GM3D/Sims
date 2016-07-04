@@ -207,7 +207,7 @@
              geometry1.vertices.push(new THREE.Vector3(p[1].x, p[1].y, 0));
              geometry1.computeLineDistances();
              var color1 = 0x0000AA;
-             var options = {color:color1, linewidth:width}
+             var options = {color:color1, linewidth:width};
              var line_mat1 = new THREE.LineBasicMaterial(options);
              gl1 = new THREE.Line(geometry1, line_mat1);
              scene1.add(gl1);
@@ -219,10 +219,22 @@
              geometry2.vertices.push(new THREE.Vector3(p[3].x, p[3].y, 0));
              geometry2.computeLineDistances();
              var color2 = 0xEE0000;
-             var options = {color:color2, linewidth:width}
+             var options = {color:color2, linewidth:width};
              var line_mat2 = new THREE.LineBasicMaterial(options);
              gl2 = new THREE.Line(geometry2, line_mat2);
              scene1.add(gl2);
+
+             for(y of [1, 0, -1]){
+                 var geometry = new THREE.Geometry();
+                 geometry.vertices.push(new THREE.Vector3(-2, y, 0));
+                 geometry.vertices.push(new THREE.Vector3(2, y, 0));
+                 geometry.computeLineDistances();
+                 var color = 0x000000;
+                 var options = {color:color, linewidth:width};
+                 var material = new THREE.LineBasicMaterial(options);
+                 var line = new THREE.Line(geometry, material);
+                 scene1.add(line);
+             }
          }
 
          function make_arc(x, y, r, start, end, color, width, dashed){
@@ -307,7 +319,6 @@
              console.log("dargs = " + dargs.toSource());
              console.log("args = " + args.toSource());
              console.log("x, y = " + x + ", " + y);
-             /* console.log("dot2 = " + dot2.toSource());*/
              dot2.position.set(x, y, 0);
              gl1.geometry.vertices[1].setX(w.x);
              gl1.geometry.vertices[1].setY(w.y);
