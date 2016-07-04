@@ -102,8 +102,7 @@
              scene1.add(dot);
 
              make_cuts(0, 0, 1.0);
-             /* make_aux_lines();
-              */
+             make_aux_lines();
              label_data1 = [
                  {text: "+1", bg_color: "0xffeeff",
                   top: 0.5 - 0.01, left: 3/8 - 0.01},
@@ -203,23 +202,23 @@
              var width = 1;
              var geometry1 = new THREE.Geometry();
              geometry1.dynamic = true;
-             geometry1.vertices.push(p[0].x, p[0].y, 0);
-             geometry1.vertices.push(w.x, w.y, 0);
-             geometry1.vertices.push(p[1].x, p[1].y, 0);
+             geometry1.vertices.push(new THREE.Vector3(p[0].x, p[0].y, 0));
+             geometry1.vertices.push(new THREE.Vector3(w.x, w.y, 0));
+             geometry1.vertices.push(new THREE.Vector3(p[1].x, p[1].y, 0));
              geometry1.computeLineDistances();
              var color1 = 0x0000AA;
              var options = {color:color1, linewidth:width}
              var line_mat1 = new THREE.LineBasicMaterial(options);
              gl1 = new THREE.Line(geometry1, line_mat1);
              scene1.add(gl1);
-
+             
              var geometry2 = new THREE.Geometry();
              geometry2.dynamic = true;
-             geometry2.vertices.push(p[2].x, p[2].y, 0);
-             geometry2.vertices.push(w.x, w.y, 0);
-             geometry2.vertices.push(p[3].x, p[3].y, 0);
+             geometry2.vertices.push(new THREE.Vector3(p[2].x, p[2].y, 0));
+             geometry2.vertices.push(new THREE.Vector3(w.x, w.y, 0));
+             geometry2.vertices.push(new THREE.Vector3(p[3].x, p[3].y, 0));
              geometry2.computeLineDistances();
-             var color2 = 0xAA0000;
+             var color2 = 0xEE0000;
              var options = {color:color2, linewidth:width}
              var line_mat2 = new THREE.LineBasicMaterial(options);
              gl2 = new THREE.Line(geometry2, line_mat2);
@@ -310,6 +309,12 @@
              console.log("x, y = " + x + ", " + y);
              /* console.log("dot2 = " + dot2.toSource());*/
              dot2.position.set(x, y, 0);
+             gl1.geometry.vertices[1].setX(w.x);
+             gl1.geometry.vertices[1].setY(w.y);
+             gl2.geometry.vertices[1].setX(w.x);
+             gl2.geometry.vertices[1].setY(w.y);
+             gl1.geometry.verticesNeedUpdate = true;
+             gl2.geometry.verticesNeedUpdate = true;
 		 }
          
          function into_range(a, b, x){
