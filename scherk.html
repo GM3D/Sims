@@ -321,15 +321,24 @@
                  for(i = 0; i < 4; i++){
                      var r2 = v[i].lengthSq();
                      prev_args[i] = args[i];
+                     // continuous change of args.
+                     // suppose arg w.r.t. p[i] is given by f
+                     // f = atan((y - p[i].y)/(x - p[i].x))
+                     // then df is calculated as (total derivative)
+                     // df = dx * (df/dx) + dy * (df/dy)
+                     // where df/dx, df/dy are partial derivatives.
                      dargs[i] = (-v[i].y * delta.x + v[i].x * delta.y) / r2;
+                     // thus args are always updated continuously up to here,
+                     // but this can cause cumulative errors.
                      args[i] += dargs[i]
-                 }
-                 // normalize args so that they are precisely equal to
-                 // args0 up to 2*pi * n
-                 for(i = 0; i < 4; i++){
-                     var da = (args[i] - args0[i])/(2*PI);
-                     var wind_num_diff = Math.round(da);
-                     args[i] = args0[i] + 2*PI*wind_num_diff;
+                     // to get rid of them, normalize args so that they are 
+                     // precisely equal to args0 up to 2*pi * n
+                     // get the "n" of 2*pi*n difference.
+                     var wind_num_diff = 
+                         Math.round((args[i] - args0[i]) / (2 * PI));
+                     // trust args for only winding number and use
+                     // args0 for precise location.
+                     args[i] = args0[i] + 2 * PI * wind_num_diff;
                  }
                  // (x, y): mapped position of w in unit of pi
                  var x = (args[0] - args[1]) / PI + 0.5;
