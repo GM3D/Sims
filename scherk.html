@@ -10,7 +10,7 @@
 	</head>
 	<body>
         <!-- <p id="info">debug info shown here</p> -->
-		<script src="js/three.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r78/three.js"></script>
 		<script>
          // everyone loves pi.
          var PI = Math.PI;
@@ -68,9 +68,9 @@
                  p[i] = new THREE.Vector2(ps[2 * i], ps[2*i + 1]);
                  v[i] = new THREE.Vector2();
              }
-             args0 = [PI/2, 3*PI/2, 0, -PI];
-             args = [PI/2, 3*PI/2, 0, -PI];
-             prev_args = [PI/2, 3*PI/2, 0, -PI];
+             args0 = [PI/2, 3*PI/2, 0, PI];
+             args = [PI/2, 3*PI/2, 0, PI];
+             prev_args = [PI/2, 3*PI/2, 0, PI];
              renderer = new THREE.WebGLRenderer();
              renderer.setSize(width, height);
              document.addEventListener('mousemove', 
@@ -318,6 +318,7 @@
                  // dargs = small diff of args constrained to move
                  // smoothly
                  var dargs = [];
+                 var raw_args = [];
                  for(i = 0; i < 4; i++){
                      var r2 = v[i].lengthSq();
                      prev_args[i] = args[i];
@@ -338,19 +339,21 @@
                          Math.round((args[i] - args0[i]) / (2 * PI));
                      // trust args for only winding number and use
                      // args0 for precise location.
+                     raw_args[i] = args[i];
                      args[i] = args0[i] + 2 * PI * wind_num_diff;
                  }
                  // (x, y): mapped position of w in unit of pi
                  var x = (args[0] - args[1]) / PI + 0.5;
                  var y = (args[2] - args[3]) / PI + 0.5;
-                 
+                 console.log("-----------");
                  /* console.log("w = " + w.toSource());
                   * console.log("prev = " + prev.toSource());
-                  * console.log("delta = " + delta.toSource());
-                  * console.log("args0 = " + args0.toSource());
-                  * console.log("dargs = " + dargs.toSource());
-                  * console.log("args = " + args.toSource());
-                  * console.log("x, y = " + x + ", " + y);*/
+                  * console.log("delta = " + delta.toSource());*/
+                 console.log("args0 = " + args0.toSource());
+                 /* console.log("dargs = " + dargs.toSource());*/
+                 console.log("raw_args = " + raw_args.toSource());
+                 console.log("args = " + args.toSource());
+                 console.log("x, y = " + x + ", " + y);
                  dot2.position.set(x, y, 0);
                  gl1.geometry.vertices[1].setX(w.x);
                  gl1.geometry.vertices[1].setY(w.y);
