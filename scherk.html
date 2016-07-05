@@ -324,9 +324,17 @@
                      dargs[i] = (-v[i].y * delta.x + v[i].x * delta.y) / r2;
                      args[i] += dargs[i]
                  }
+                 // normalize args so that they are precisely equal to
+                 // args0 up to 2*pi * n
+                 for(i = 0; i < 4; i++){
+                     var da = (args[i] - args0[i])/(2*PI);
+                     var wind_num_diff = Math.round(da);
+                     args[i] = args0[i] + 2*PI*wind_num_diff;
+                 }
                  // (x, y): mapped position of w in unit of pi
                  var x = (args[0] - args[1]) / PI + 0.5;
                  var y = (args[2] - args[3]) / PI + 0.5;
+                 
                  /* console.log("w = " + w.toSource());
                   * console.log("prev = " + prev.toSource());
                   * console.log("delta = " + delta.toSource());
@@ -370,12 +378,21 @@
          }
 
          function onKeyPress(event){
-             console.log("key pressed: " + String.fromCharCode(event.which));
-             if(String.fromCharCode(event.which) == "s"){
-                 sim_on = false;
+             var key = String.fromCharCode(event.which);
+             switch(key){
+                 case "s":
+                     sim_on = false;
+                     break;
+                 case "g":
+                     gl1.visible = !gl1.visible;
+                     gl2.visible = !gl2.visible;
+                     break;
+                 default:
+                     // do nothing
              }
              console.log("---");
          }
+
          function animate(){
 	         requestAnimationFrame(animate);
              render();
