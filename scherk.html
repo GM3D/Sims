@@ -345,15 +345,11 @@
                  // (x, y): mapped position of w in unit of pi
                  var x = (args[0] - args[1]) / PI + 0.5;
                  var y = (args[2] - args[3]) / PI + 0.5;
-                 console.log("-----------");
-                 /* console.log("w = " + w.toSource());
-                  * console.log("prev = " + prev.toSource());
-                  * console.log("delta = " + delta.toSource());*/
-                 console.log("args0 = " + args0.toSource());
-                 /* console.log("dargs = " + dargs.toSource());*/
-                 console.log("raw_args = " + raw_args.toSource());
-                 console.log("args = " + args.toSource());
-                 console.log("x, y = " + x + ", " + y);
+                 /* console.log("-----------");
+                  * console.log("args0 = " + args0);
+                  * console.log("raw_args = " + raw_args);
+                  * console.log("args = " + args);
+                  * console.log("x, y = " + x + ", " + y);*/
                  dot2.position.set(x, y, 0);
                  gl1.geometry.vertices[1].setX(w.x);
                  gl1.geometry.vertices[1].setY(w.y);
