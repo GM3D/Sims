@@ -11,6 +11,7 @@
 	<body>
         <!-- <p id="info">debug info shown here</p> -->
 		<script src="js/three.js"></script>
+        <script src='js/THREEx.KeyboardState.js'></script>
 		<script>
          // everyone loves pi.
          var PI = Math.PI;
@@ -30,6 +31,7 @@
          // it is false untill mouse reaches the origin first.
          var sim_on = false;
          var mouse;
+         var keyboard;
 
          var dot, dot2;
          // guiding lines on scene1
@@ -58,6 +60,7 @@
          animate();
 
          function init(){
+             keyboard = new THREEx.KeyboardState();
              mouse = new THREE.Vector2(0, 0);
              w = new THREE.Vector2(0, 0);
              prev = new THREE.Vector2(0, 0);
@@ -363,6 +366,10 @@
          }
 
          function update(){
+             // freeze update when s key is pressed
+             if(keyboard.pressed("S")){
+                 sim_on = false;
+             }
          }
 
          function animate(){
