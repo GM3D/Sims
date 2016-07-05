@@ -11,7 +11,6 @@
 	<body>
         <!-- <p id="info">debug info shown here</p> -->
 		<script src="js/three.js"></script>
-        <script src='js/THREEx.KeyboardState.js'></script>
 		<script>
          // everyone loves pi.
          var PI = Math.PI;
@@ -30,9 +29,7 @@
          // flag to indicate simulation should start.
          // it is false untill mouse reaches the origin first.
          var sim_on = false;
-         var mouse;
-         var keyboard;
-
+         var prev_mouse, mouse;
          var dot, dot2;
          // guiding lines on scene1
          var gl1, gl2;
@@ -60,7 +57,7 @@
          animate();
 
          function init(){
-             keyboard = new THREEx.KeyboardState();
+             prev_mouse = new THREE.Vector2(0, 0);
              mouse = new THREE.Vector2(0, 0);
              w = new THREE.Vector2(0, 0);
              prev = new THREE.Vector2(0, 0);
@@ -78,6 +75,8 @@
              renderer.setSize(width, height);
              document.addEventListener('mousemove', 
                                        onDocumentMouseMove, false);
+             document.addEventListener('keypress', 
+                                       onKeyPress, false);
              document.body.appendChild(renderer.domElement);
              scene1 = new THREE.Scene();
              scene2 = new THREE.Scene();
@@ -282,13 +281,15 @@
          }
 
          function onDocumentMouseMove(event){
+             prev_mouse.copy(mouse);
              /* -r <= mouse.x < r */
 			 mouse.x = r * ((event.clientX / width) * 2 - 1) + r / 2;
              /* -r*aspect  <= mouse.y < r*aspect */
 			 mouse.y = r * (-(event.clientY - height / 2) / width) * 2;
              // start updating once mouse comes to center dot.
              if(!sim_on){
-                 if( Math.abs(mouse.x) <= 0.05 && Math.abs(mouse.y) <= 0.05){
+                 if(prev_mouse.distanceTo(w) > 0.05 &&
+                    mouse.distanceTo(w) <= 0.05){
                      sim_on = true;
                  }
              }
@@ -326,13 +327,13 @@
                  // (x, y): mapped position of w in unit of pi
                  var x = (args[0] - args[1]) / PI + 0.5;
                  var y = (args[2] - args[3]) / PI + 0.5;
-                 console.log("w = " + w.toSource());
-                 console.log("prev = " + prev.toSource());
-                 console.log("delta = " + delta.toSource());
-                 console.log("args0 = " + args0.toSource());
-                 console.log("dargs = " + dargs.toSource());
-                 console.log("args = " + args.toSource());
-                 console.log("x, y = " + x + ", " + y);
+                 /* console.log("w = " + w.toSource());
+                  * console.log("prev = " + prev.toSource());
+                  * console.log("delta = " + delta.toSource());
+                  * console.log("args0 = " + args0.toSource());
+                  * console.log("dargs = " + dargs.toSource());
+                  * console.log("args = " + args.toSource());
+                  * console.log("x, y = " + x + ", " + y);*/
                  dot2.position.set(x, y, 0);
                  gl1.geometry.vertices[1].setX(w.x);
                  gl1.geometry.vertices[1].setY(w.y);
@@ -366,12 +367,15 @@
          }
 
          function update(){
-             // freeze update when s key is pressed
-             if(keyboard.pressed("S")){
-                 sim_on = false;
-             }
          }
 
+         function onKeyPress(event){
+             console.log("key pressed: " + String.fromCharCode(event.which));
+             if(String.fromCharCode(event.which) == "s"){
+                 sim_on = false;
+             }
+             console.log("---");
+         }
          function animate(){
 	         requestAnimationFrame(animate);
              render();
